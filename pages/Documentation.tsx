@@ -1,5 +1,5 @@
-import React from 'react';
-import { BookOpen, Code, Terminal, AlertCircle } from 'lucide-react';
+import React from "react";
+import { BookOpen, Code, Terminal, AlertCircle } from "lucide-react";
 
 export const Documentation: React.FC = () => {
   return (
@@ -7,16 +7,29 @@ export const Documentation: React.FC = () => {
       <div className="border-b border-slate-800 pb-8 mb-8">
         <h1 className="text-3xl font-bold text-white mb-4">Operator Manual</h1>
         <p className="text-lg text-slate-400">
-          Technical reference for the Betfair Historical Data Multi-Agent Scraper.
+          Technical reference for the Betfair Historical Data Multi-Agent
+          Scraper.
         </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
         {/* Table of Contents */}
         <aside className="lg:col-span-1 space-y-1">
-          <h4 className="text-sm font-semibold text-white uppercase tracking-wider mb-4">Contents</h4>
-          {['System Overview', 'Agent Roles', 'Data Dictionary', 'Troubleshooting', 'BigQuery Schema'].map((item) => (
-            <a key={item} href={`#${item.toLowerCase().replace(' ', '-')}`} className="block px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors">
+          <h4 className="text-sm font-semibold text-white uppercase tracking-wider mb-4">
+            Contents
+          </h4>
+          {[
+            "System Overview",
+            "Agent Roles",
+            "Data Dictionary",
+            "Troubleshooting",
+            "BigQuery Schema",
+          ].map((item) => (
+            <a
+              key={item}
+              href={`#${item.toLowerCase().replace(" ", "-")}`}
+              className="block px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
+            >
               {item}
             </a>
           ))}
@@ -24,20 +37,22 @@ export const Documentation: React.FC = () => {
 
         {/* Content */}
         <div className="lg:col-span-3 space-y-12">
-          
           <section id="system-overview" className="space-y-4">
             <h2 className="text-xl font-bold text-white flex items-center gap-2">
               <BookOpen className="h-5 w-5 text-neon-blue" /> System Overview
             </h2>
             <div className="prose prose-invert max-w-none text-slate-400">
               <p>
-                The <strong>Betfair Nexus</strong> is a distributed, serverless architecture running on Cloudflare Workers AI. 
-                It is designed to ingest 15 years of Betfair Exchange data, transforming raw JSON streams into analytic-ready 
-                Parquet structures in Google BigQuery.
+                The <strong>Betfair Nexus</strong> is a distributed, serverless
+                architecture running on Cloudflare Workers AI. It is designed to
+                ingest 15 years of Betfair Exchange data, transforming raw JSON
+                streams into analytic-ready Parquet structures in Google
+                BigQuery.
               </p>
               <div className="bg-slate-900 p-4 rounded-lg border border-slate-800 mt-4">
                 <code className="text-xs font-mono text-neon-cyan">
-                  Orchestrator -> Ingestion (R2) -> Transformation (Workers) -> Persistence (BigQuery)
+                  Orchestrator -&gt; Ingestion (R2) -&gt; Transformation
+                  (Workers) -&gt; Persistence (BigQuery)
                 </code>
               </div>
             </div>
@@ -49,13 +64,30 @@ export const Documentation: React.FC = () => {
             </h2>
             <div className="grid gap-4">
               {[
-                { title: 'Orchestration Agent', desc: 'Manages global state, retries, and queue distribution.' },
-                { title: 'Ingestion Agent', desc: 'Fetches raw .bz2 files from Betfair Historical Data API.' },
-                { title: 'Transformation Agent', desc: 'Calculates delta_p, implied prob, and aligns to off-time (T=0).' },
-                { title: 'Persistence Agent', desc: 'Batches transformed rows and streams to BigQuery via Storage Write API.' }
-              ].map(agent => (
-                <div key={agent.title} className="p-4 bg-slate-900 border border-slate-800 rounded-lg">
-                  <h3 className="font-semibold text-white mb-1">{agent.title}</h3>
+                {
+                  title: "Orchestration Agent",
+                  desc: "Manages global state, retries, and queue distribution.",
+                },
+                {
+                  title: "Ingestion Agent",
+                  desc: "Fetches raw .bz2 files from Betfair Historical Data API.",
+                },
+                {
+                  title: "Transformation Agent",
+                  desc: "Calculates delta_p, implied prob, and aligns to off-time (T=0).",
+                },
+                {
+                  title: "Persistence Agent",
+                  desc: "Batches transformed rows and streams to BigQuery via Storage Write API.",
+                },
+              ].map((agent) => (
+                <div
+                  key={agent.title}
+                  className="p-4 bg-slate-900 border border-slate-800 rounded-lg"
+                >
+                  <h3 className="font-semibold text-white mb-1">
+                    {agent.title}
+                  </h3>
                   <p className="text-sm text-slate-400">{agent.desc}</p>
                 </div>
               ))}
@@ -66,10 +98,15 @@ export const Documentation: React.FC = () => {
             <h2 className="text-xl font-bold text-white flex items-center gap-2">
               <Code className="h-5 w-5 text-emerald-500" /> BigQuery Schema
             </h2>
-            <p className="text-sm text-slate-400">Target table: <code className="text-emerald-400">betfair_analytics.race_metrics</code></p>
+            <p className="text-sm text-slate-400">
+              Target table:{" "}
+              <code className="text-emerald-400">
+                betfair_analytics.race_metrics
+              </code>
+            </p>
             <div className="bg-slate-950 p-6 rounded-xl border border-slate-800 overflow-x-auto">
               <pre className="text-xs font-mono text-slate-300">
-{`CREATE TABLE \`race_metrics\`
+                {`CREATE TABLE \`race_metrics\`
 (
   market_id STRING NOT NULL,
   selection_id INT64 NOT NULL,
@@ -96,14 +133,16 @@ CLUSTER BY market_id;`}
               <AlertCircle className="h-5 w-5 text-neon-red" /> Troubleshooting
             </h2>
             <div className="bg-neon-red/5 border border-neon-red/10 p-4 rounded-lg">
-              <h4 className="text-neon-red font-semibold mb-2">Agent Failure: Rate Limits</h4>
+              <h4 className="text-neon-red font-semibold mb-2">
+                Agent Failure: Rate Limits
+              </h4>
               <p className="text-sm text-slate-400">
-                If the Ingestion Agent reports HTTP 429, the Orchestrator will automatically back off for 
-                15 minutes. No manual intervention is required unless the error persists for > 2 hours.
+                If the Ingestion Agent reports HTTP 429, the Orchestrator will
+                automatically back off for 15 minutes. No manual intervention is
+                required unless the error persists for &gt; 2 hours.
               </p>
             </div>
           </section>
-
         </div>
       </div>
     </div>
