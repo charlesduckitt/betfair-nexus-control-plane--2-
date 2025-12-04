@@ -1,0 +1,5 @@
+{
+  "name": "Betfair Nexus Control Plane",
+  "description": "A high-performance command center for the Betfair Historical Data Multi-Agent Scraper and Analytics Pipeline.",
+  "requestFramePermissions": []
+}
