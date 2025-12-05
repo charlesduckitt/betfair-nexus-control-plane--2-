@@ -18,7 +18,12 @@ export const TerminalLog: React.FC<TerminalLogProps> = ({ logs }) => {
 
   // Scroll to bottom only when autoScroll is enabled (user at bottom or explicit)
   useEffect(() => {
-    if (autoScrollRef.current) {
+    const el = containerRef.current;
+    // determine if the user is at (or near) the bottom right now
+    const atBottom = el
+      ? el.scrollTop + el.clientHeight >= el.scrollHeight - 20
+      : true;
+    if (autoScrollRef.current || atBottom) {
       endRef.current?.scrollIntoView({ behavior: "smooth" });
     }
   }, [logs]);
