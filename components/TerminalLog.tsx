@@ -1,5 +1,5 @@
-import React, { useEffect, useRef } from 'react';
-import { LogEntry } from '../types';
+import React, { useEffect, useRef, useState } from "react";
+import { LogEntry } from "../types";
 
 interface TerminalLogProps {
   logs: LogEntry[];
@@ -7,18 +7,56 @@ interface TerminalLogProps {
 
 export const TerminalLog: React.FC<TerminalLogProps> = ({ logs }) => {
   const endRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const autoScrollRef = useRef(true);
+  const [autoScroll, setAutoScroll] = useState(true);
 
+  // Keep autoScrollRef in sync with state for use inside effects
   useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: 'smooth' });
+    autoScrollRef.current = autoScroll;
+  }, [autoScroll]);
+
+  // Scroll to bottom only when autoScroll is enabled (user at bottom or explicit)
+  useEffect(() => {
+    if (autoScrollRef.current) {
+      endRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
   }, [logs]);
 
-  const getLevelColor = (level: LogEntry['level']) => {
-    switch(level) {
-      case 'INFO': return 'text-slate-400';
-      case 'WARN': return 'text-neon-amber';
-      case 'ERROR': return 'text-neon-red';
-      case 'SUCCESS': return 'text-neon-green';
-      default: return 'text-slate-200';
+  // Track user scrolling to disable auto-scroll when they scroll up
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const onScroll = () => {
+      const { scrollTop, scrollHeight, clientHeight } = el;
+      const atBottom = scrollTop + clientHeight >= scrollHeight - 20;
+      if (atBottom) {
+        setAutoScroll(true);
+      } else {
+        setAutoScroll(false);
+      }
+    };
+
+    el.addEventListener("scroll", onScroll, { passive: true });
+    // initialize
+    onScroll();
+
+    return () => el.removeEventListener("scroll", onScroll);
+  }, []);
+
+  const getLevelColor = (level: LogEntry["level"]) => {
+    switch (level) {
+      case "INFO":
+        return "text-slate-400";
+      case "WARN":
+        return "text-neon-amber";
+      case "ERROR":
+        return "text-neon-red";
+      case "SUCCESS":
+        return "text-neon-green";
+      default:
+        return "text-slate-200";
     }
   };
 
@@ -32,16 +70,42 @@ export const TerminalLog: React.FC<TerminalLogProps> = ({ logs }) => {
           <div className="w-2.5 h-2.5 rounded-full bg-green-500/50" />
         </div>
       </div>
-      <div className="flex-1 overflow-y-auto p-4 space-y-1.5 scrollbar-thin">
+      <div
+        className="flex-1 overflow-y-auto p-4 space-y-1.5 scrollbar-thin"
+        ref={containerRef}
+      >
+        <div className="flex items-center justify-end mb-2">
+          <button
+            onClick={() => setAutoScroll((s) => !s)}
+            className={`text-xs px-2 py-0.5 rounded text-slate-300/80 bg-slate-900/30 border border-slate-800 hover:bg-slate-900/50 transition-colors ${
+              autoScroll ? "ring-1 ring-neon-cyan/20" : ""
+            }`}
+          >
+            {autoScroll ? "Tailing" : "Paused"}
+          </button>
+        </div>
         {logs.map((log) => (
-          <div key={log.id} className="flex gap-3 hover:bg-slate-900/50 p-0.5 rounded">
+          <div
+            key={log.id}
+            className="flex gap-3 hover:bg-slate-900/50 p-0.5 rounded"
+          >
             <span className="text-slate-600 shrink-0">
-              {log.timestamp.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second:'2-digit' })}.{log.timestamp.getMilliseconds().toString().padStart(3, '0')}
+              {log.timestamp.toLocaleTimeString("en-US", {
+                hour12: false,
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit",
+              })}
+              .{log.timestamp.getMilliseconds().toString().padStart(3, "0")}
             </span>
-            <span className={`font-bold w-16 shrink-0 ${getLevelColor(log.level)}`}>
+            <span
+              className={`font-bold w-16 shrink-0 ${getLevelColor(log.level)}`}
+            >
               {log.level}
             </span>
-            <span className="text-slate-500 w-32 shrink-0 truncate">[{log.agent.replace(' Agent', '')}]</span>
+            <span className="text-slate-500 w-32 shrink-0 truncate">
+              [{log.agent.replace(" Agent", "")}]
+            </span>
             <span className="text-slate-300 break-all">{log.message}</span>
           </div>
         ))}
